@@ -3,9 +3,28 @@
     <img src="../../assets/netflix-beer.png" alt="netflix-beer" />
     <h1>{{ title }}</h1>
     <div class="slide-description">
-      <Done :color="color" :visible="!scrolling" />
-      <No :color="color" :visible="!scrolling" />
-      <Wait :color="color" :visible="!scrolling" />
+      <button type="button" class="empty" @click="toggleDetail">
+        <Done :color="color" :visible="!scrolling" v-if="isDone" />
+        <Wait :color="color" :visible="!scrolling" v-else-if="isWait" />
+        <No :color="color" :visible="!scrolling" v-else />
+      </button>
+      <div class="slide-details" v-if="displayDetail && !scrolling">
+        <div
+          v-for="detail in data.paymentInfo"
+          :key="detail.id"
+          class="slide-detail"
+        >
+          <Done
+            :color="color"
+            :visible="displayDetail && !scrolling"
+            v-if="detail.accepted"
+          />
+          <No :color="color" :visible="displayDetail && !scrolling" v-else />
+          {{ detail.id }}
+          <div class="spacer"></div>
+          <button type="button">CTA</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -33,6 +52,9 @@ export default {
       default: false
     }
   },
+  data: () => ({
+    displayDetail: false
+  }),
   computed: {
     title() {
       return _capitalize(dayjs(this.data.month, "YYYY-MM").format("MMMM YYYY"));
@@ -40,8 +62,11 @@ export default {
     theme() {
       return this.even ? "dark" : "light";
     },
-    paymentInfo() {
-      return this.data.paymentInfo;
+    isDone() {
+      return this.data.paymentInfo.every(it => it.accepted);
+    },
+    isWait() {
+      return this.data.paymentInfo.findIndex(it => it.accepted) !== -1;
     },
     color() {
       return this.$styleVariables.colors(this.theme).textColor;
@@ -56,6 +81,11 @@ export default {
         return null;
       }
       this.$styleVariables.applyTheme(this.theme, this.$el);
+    }
+  },
+  methods: {
+    toggleDetail() {
+      this.displayDetail = !this.displayDetail;
     }
   }
 };
@@ -95,6 +125,33 @@ h1 {
 .slide-description {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  min-height: 300px;
+  min-width: 80vw;
+}
+
+.slide-details {
+  border: solid 1px;
+  border-radius: 12px;
+  padding: 13px;
+  width: 100%;
+}
+
+.slide-detail {
+  display: flex;
+  align-items: center;
+}
+.slide-detail svg {
+  height: 50px;
+  width: 50px;
+  margin-right: 20px;
+}
+
+.empty {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.spacer {
+  flex-grow: 1;
 }
 </style>

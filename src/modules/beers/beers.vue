@@ -23,16 +23,16 @@ export default {
           }
         },
         payment: {
-          "2019-01": {
+          "2019-10": {
             acceptedBy: [
               "mathieu.mure@gmail.com",
               "arnaud.braconnier@gmail.com"
             ]
           },
-          "2019-02": {
+          "2019-11": {
             acceptedBy: ["mathieu.mure@gmail.com"]
           },
-          "2019-03": {
+          "2019-12": {
             acceptedBy: ["arnaud.braconnier@gmail.com"]
           }
         }

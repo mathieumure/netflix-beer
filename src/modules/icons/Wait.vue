@@ -117,7 +117,7 @@ svg {
 }
 
 svg.animated {
-  display: block;
+  display: inline-block;
   animation: flip 1s;
 }
 svg.animated .initial-fill {
