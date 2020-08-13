@@ -1,17 +1,25 @@
 import Vue from "vue";
 import Router from "vue-router";
 
+import NewBeers from "./modules/beers/newBeers";
+import Beers from "./modules/beers/beers";
+
 Vue.use(Router);
 
 export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
   routes: [
-    // {
-    //   path: "/",
-    //   name: "home",
-    //   component: Home
-    // },
+    {
+      path: "/",
+      name: "home",
+      component: Beers
+    },
+    {
+      path: "/new",
+      name: "new",
+      component: NewBeers
+    }
     // {
     //   path: "/about",
     //   name: "about",

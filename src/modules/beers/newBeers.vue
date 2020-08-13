@@ -1,0 +1,104 @@
+<template>
+  <main class="beers-wrapper">
+    <button type="button" class="left-slide-btn slide-btn" @click="slideLeft">
+      &lt;
+    </button>
+    <div class="beers-sliders" :style="{ transform: translateAmount }">
+      <Beer class="beer" :title="'1'" />
+      <Beer class="beer" :title="'2'" />
+      <Beer class="beer" :title="'3'" />
+    </div>
+    <button type="button" class="right-slide-btn slide-btn" @click="slideRight">
+      &gt;
+    </button>
+  </main>
+</template>
+<script>
+import Beer from "./beer";
+
+const NB_SLIDES = 3;
+
+export default {
+  components: { Beer },
+  data: () => ({
+    currentSlide: 1,
+    addEventListener: null
+  }),
+  mounted() {
+    window.addEventListener("keydown", this.handleKeyEvent.bind(this));
+  },
+  destroyed() {
+    window.removeEventListener("keydown", this.handleKeyEvent);
+  },
+  computed: {
+    translateAmount() {
+      return "translateX(" + this.currentSlide * -100 + "%)";
+    }
+  },
+  methods: {
+    handleKeyEvent($event) {
+      if ($event.key === "ArrowRight") {
+        this.slideRight();
+      }
+      if ($event.key === "ArrowLeft") {
+        this.slideLeft();
+      }
+    },
+    slideLeft() {
+      const nextSlide = this.currentSlide - 1;
+      if (nextSlide >= 0) {
+        this.currentSlide = nextSlide;
+      }
+    },
+    slideRight() {
+      const nextSlide = this.currentSlide + 1;
+      if (nextSlide < NB_SLIDES) this.currentSlide = nextSlide;
+    }
+  }
+};
+</script>
+<style scoped>
+.beers-wrapper {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.beers-sliders {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+
+.beer {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.slide-btn {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-size: 4rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--textColor);
+}
+
+.left-slide-btn {
+  left: 0;
+  z-index: 10;
+  margin-left: 30px;
+}
+
+.right-slide-btn {
+  right: 0;
+  margin-right: 30px;
+}
+</style>
