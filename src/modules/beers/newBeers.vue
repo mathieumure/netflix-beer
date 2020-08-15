@@ -3,10 +3,17 @@
     <button type="button" class="left-slide-btn slide-btn" @click="slideLeft">
       &lt;
     </button>
-    <div class="beers-sliders" :style="{ transform: translateAmount }">
-      <Beer class="beer" :title="'1'" />
-      <Beer class="beer" :title="'2'" />
-      <Beer class="beer" :title="'3'" />
+    <div
+      class="beers-sliders"
+      :style="{ transform: translateAmount }"
+      :class="{ 'beers-sliders--animated': withAnimation }"
+    >
+      <Beer
+        class="beer"
+        :title="getDateLabel(beer.date)"
+        :key="beer.label"
+        v-for="beer in slides"
+      />
     </div>
     <button type="button" class="right-slide-btn slide-btn" @click="slideRight">
       &gt;
@@ -15,14 +22,27 @@
 </template>
 <script>
 import Beer from "./beer";
+import dayjs from "dayjs";
 
-const NB_SLIDES = 3;
+window.dayjs = dayjs;
+
+const createDate = nbMonth => {
+  return dayjs().add(nbMonth, "month");
+};
+
+const createSlide = delta => ({
+  id: delta,
+  delta,
+  date: createDate(delta)
+});
 
 export default {
+  name: "NewBeers",
   components: { Beer },
   data: () => ({
+    slides: [createSlide(-1), createSlide(0), createSlide(1)],
     currentSlide: 1,
-    addEventListener: null
+    withAnimation: true
   }),
   mounted() {
     window.addEventListener("keydown", this.handleKeyEvent.bind(this));
@@ -33,6 +53,9 @@ export default {
   computed: {
     translateAmount() {
       return "translateX(" + this.currentSlide * -100 + "%)";
+    },
+    nbSlides() {
+      return this.slides.length;
     }
   },
   methods: {
@@ -43,16 +66,47 @@ export default {
       if ($event.key === "ArrowLeft") {
         this.slideLeft();
       }
+      if ($event.key === "b") {
+        this.insertSlideBefore();
+      }
+      if ($event.key === "a") {
+        this.appendSlideAfter();
+      }
     },
     slideLeft() {
+      this.withAnimation = true;
       const nextSlide = this.currentSlide - 1;
       if (nextSlide >= 0) {
         this.currentSlide = nextSlide;
+        if (nextSlide === 0) {
+          setTimeout(this.insertSlideBefore, 300);
+        }
       }
     },
     slideRight() {
+      this.withAnimation = true;
       const nextSlide = this.currentSlide + 1;
-      if (nextSlide < NB_SLIDES) this.currentSlide = nextSlide;
+      if (nextSlide < this.nbSlides) {
+        this.currentSlide = nextSlide;
+        if (nextSlide === this.nbSlides - 1) {
+          setTimeout(this.appendSlideAfter, 300);
+        }
+      }
+    },
+    insertSlideBefore() {
+      const nextDelta = this.slides[0].delta - 1;
+      this.$set(this, "slides", [createSlide(nextDelta), ...this.slides]);
+      this.withAnimation = false;
+      this.currentSlide++;
+    },
+    appendSlideAfter() {
+      const lastSlide = this.slides.slice(-1)[0];
+      const nextDelta = lastSlide.delta + 1;
+
+      this.slides.push(createSlide(nextDelta));
+    },
+    getDateLabel(date) {
+      return date.format("MMM YYYY");
     }
   }
 };
@@ -68,7 +122,9 @@ export default {
   display: flex;
   flex-direction: row;
   height: 100%;
-  transform: translateX(-100%);
+}
+
+.beers-sliders--animated {
   transition: transform 0.3s;
 }
 
