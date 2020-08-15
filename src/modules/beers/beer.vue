@@ -2,15 +2,31 @@
   <section>
     <img src="../../assets/netflix-beer.png" alt="netflix-beer" />
     <h2>{{ title }}</h2>
+    <Done v-if="isDone" />
+    <Wait v-else-if="isWait" />
+    <No v-else />
   </section>
 </template>
 <script>
+import Done from "../icons/Done";
+import Wait from "../icons/Wait";
+import No from "../icons/No";
+
 export default {
   name: "beer",
+  components: { Done, Wait, No },
   props: {
     title: {
       type: String,
       required: true
+    },
+    isDone: {
+      type: Boolean,
+      default: false
+    },
+    isWait: {
+      type: Boolean,
+      default: false
     }
   }
 };

@@ -9,10 +9,12 @@
       :class="{ 'beers-sliders--animated': withAnimation }"
     >
       <Beer
+        v-for="beer in slides"
+        :key="beer.id"
         class="beer"
         :title="getDateLabel(beer.date)"
-        :key="beer.label"
-        v-for="beer in slides"
+        :is-done="beer.isDone"
+        :is-wait="beer.isWait"
       />
     </div>
     <button type="button" class="right-slide-btn slide-btn" @click="slideRight">
@@ -30,17 +32,19 @@ const createDate = nbMonth => {
   return dayjs().add(nbMonth, "month");
 };
 
-const createSlide = delta => ({
+const createSlide = (delta, status) => ({
   id: delta,
   delta,
-  date: createDate(delta)
+  date: createDate(delta),
+  isDone: status === 1,
+  isWait: status === 0
 });
 
 export default {
   name: "NewBeers",
   components: { Beer },
   data: () => ({
-    slides: [createSlide(-1), createSlide(0), createSlide(1)],
+    slides: [createSlide(-1, 1), createSlide(0, 0), createSlide(1)],
     currentSlide: 1,
     withAnimation: true
   }),
