@@ -3,11 +3,9 @@
 </template>
 <script>
 import { firestore } from "./firebase";
-// import Beers from "./modules/beers/beers";
 
 export default {
   name: "app",
-  // components: { Beers },
   data() {
     return {
       meta: {}
