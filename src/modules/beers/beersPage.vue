@@ -3,6 +3,14 @@
     <button type="button" class="left-slide-btn slide-btn" @click="slideLeft">
       &lt;
     </button>
+    <button
+      type="button"
+      class="up-slide-btn slide-btn"
+      :class="{ hidden: !detailDisplayed }"
+      @click="toggleDetailDisplay"
+    >
+      ↑
+    </button>
     <div
       class="beers-sliders"
       :style="{ transform: translateAmount }"
@@ -28,6 +36,7 @@
     <button
       type="button"
       class="bottom-slide-btn slide-btn"
+      :class="{ hidden: detailDisplayed }"
       @click="toggleDetailDisplay"
     >
       ↓
@@ -170,6 +179,28 @@ export default {
 };
 </script>
 <style scoped>
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 .beers-wrapper {
   height: 100%;
   width: 100%;
@@ -221,6 +252,17 @@ export default {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.up-slide-btn {
+  z-index: 1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hidden {
+  animation: fadeOut 0.3s forwards;
 }
 
 .beer-detail {
