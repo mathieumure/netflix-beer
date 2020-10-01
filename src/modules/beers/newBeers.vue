@@ -17,14 +17,29 @@
         :is-wait="beer.isWait"
       />
     </div>
+    <BeerDetail
+      class="beer-detail"
+      :detail="slides[currentSlide]"
+      :class="{ 'beer-detail--displayed': detailDisplayed }"
+    />
     <button type="button" class="right-slide-btn slide-btn" @click="slideRight">
       &gt;
+    </button>
+    <button
+      type="button"
+      class="bottom-slide-btn slide-btn"
+      @click="toggleDetailDisplay"
+    >
+      ↓
     </button>
   </main>
 </template>
 <script>
 import Beer from "./beer";
 import dayjs from "dayjs";
+import BeerDetail from "./beerDetail";
+import { firestore } from "../../firebase";
+import _ from "lodash";
 
 window.dayjs = dayjs;
 
@@ -42,12 +57,17 @@ const createSlide = (delta, status) => ({
 
 export default {
   name: "NewBeers",
-  components: { Beer },
+  components: { BeerDetail, Beer },
   data: () => ({
     slides: [createSlide(-1, 1), createSlide(0, 0), createSlide(1)],
     currentSlide: 1,
-    withAnimation: true
+    withAnimation: true,
+    detailDisplayed: false,
+    payments: []
   }),
+  firestore: {
+    payments: firestore.collection("payments")
+  },
   mounted() {
     window.addEventListener("keydown", this.handleKeyEvent.bind(this));
   },
@@ -56,10 +76,26 @@ export default {
   },
   computed: {
     translateAmount() {
-      return "translateX(" + this.currentSlide * -100 + "%)";
+      const translateY = this.detailDisplayed ? -100 : 0;
+      return (
+        "translateX(" +
+        this.currentSlide * -100 +
+        "%) translateY(" +
+        translateY +
+        "%)"
+      );
     },
     nbSlides() {
       return this.slides.length;
+    },
+    paymentsByMonth() {
+      return _.keyBy(this.payments, "month");
+    }
+  },
+  watch: {
+    detailDisplayed() {
+      const currentTheme = this.detailDisplayed ? "dark" : "light";
+      this.$styleVariables.applyTheme(currentTheme, ".slide-btn");
     }
   },
   methods: {
@@ -69,6 +105,12 @@ export default {
       }
       if ($event.key === "ArrowLeft") {
         this.slideLeft();
+      }
+      if ($event.key === "ArrowDown") {
+        this.displayDetail();
+      }
+      if ($event.key === "ArrowUp") {
+        this.hideDetail();
       }
       if ($event.key === "b") {
         this.insertSlideBefore();
@@ -96,6 +138,18 @@ export default {
           setTimeout(this.appendSlideAfter, 300);
         }
       }
+    },
+    displayDetail() {
+      this.withAnimation = true;
+      this.detailDisplayed = true;
+    },
+    hideDetail() {
+      this.withAnimation = true;
+      this.detailDisplayed = false;
+    },
+    toggleDetailDisplay() {
+      this.withAnimation = true;
+      this.detailDisplayed = !this.detailDisplayed;
     },
     insertSlideBefore() {
       const nextDelta = this.slides[0].delta - 1;
@@ -127,7 +181,6 @@ export default {
   flex-direction: row;
   height: 100%;
 }
-
 .beers-sliders--animated {
   transition: transform 0.3s;
 }
@@ -142,8 +195,6 @@ export default {
   border: none;
   padding: 0;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
 
   font-size: 4rem;
   font-weight: bold;
@@ -152,13 +203,32 @@ export default {
 }
 
 .left-slide-btn {
+  top: 50%;
+  transform: translateY(-50%);
   left: 0;
   z-index: 10;
   margin-left: 30px;
 }
 
 .right-slide-btn {
+  top: 50%;
+  transform: translateY(-50%);
   right: 0;
   margin-right: 30px;
+}
+
+.bottom-slide-btn {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.beer-detail {
+  height: 100%;
+  width: 100%;
+  transition: transform 0.3s;
+}
+.beer-detail--displayed {
+  transform: translateY(-100%);
 }
 </style>

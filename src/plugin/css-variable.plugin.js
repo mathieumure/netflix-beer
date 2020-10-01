@@ -18,15 +18,15 @@ class CssVariablePlugin {
   applyTheme(theme, elementOrSelector = this.defaultSelector) {
     const element =
       typeof elementOrSelector === "object"
-        ? elementOrSelector
-        : document.querySelector(elementOrSelector);
+        ? [elementOrSelector]
+        : document.querySelectorAll(elementOrSelector);
 
     for (let [key, value] of Object.entries(this.themes[theme])) {
       let colorValue = value;
       if (typeof value === "function") {
         colorValue = this.themes[theme][value()];
       }
-      element.style.setProperty(`--${key}`, colorValue);
+      element.forEach(it => it.style.setProperty(`--${key}`, colorValue));
     }
   }
 
