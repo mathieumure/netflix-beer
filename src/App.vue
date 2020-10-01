@@ -1,13 +1,13 @@
 <template>
-  <Beers />
+  <router-view />
 </template>
 <script>
 import { firestore } from "./firebase";
-import Beers from "./modules/beers/beers";
+// import Beers from "./modules/beers/beers";
 
 export default {
   name: "app",
-  components: { Beers },
+  // components: { Beers },
   data() {
     return {
       meta: {}
@@ -28,5 +28,11 @@ export default {
 
 * {
   font-family: "Volkhov", serif !important;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
 }
 </style>
