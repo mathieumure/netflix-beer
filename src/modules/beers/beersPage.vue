@@ -3,6 +3,14 @@
     <button type="button" class="left-slide-btn slide-btn" @click="slideLeft">
       &lt;
     </button>
+    <button
+      type="button"
+      class="up-slide-btn slide-btn"
+      :class="{ hidden: !detailDisplayed }"
+      @click="toggleDetailDisplay"
+    >
+      ↑
+    </button>
     <div
       class="beers-sliders"
       :style="{ transform: translateAmount }"
@@ -28,6 +36,7 @@
     <button
       type="button"
       class="bottom-slide-btn slide-btn"
+      :class="{ hidden: detailDisplayed }"
       @click="toggleDetailDisplay"
     >
       ↓
@@ -56,23 +65,38 @@ const createSlide = (delta, status) => ({
 });
 
 export default {
-  name: "NewBeers",
+  name: "Beers",
   components: { BeerDetail, Beer },
   data: () => ({
     slides: [createSlide(-1, 1), createSlide(0, 0), createSlide(1)],
     currentSlide: 1,
     withAnimation: true,
     detailDisplayed: false,
-    payments: []
+    payments: [],
+    touchData: { startX: -1, startY: -1, endX: -1, endY: -1 }
   }),
   firestore: {
     payments: firestore.collection("payments")
   },
   mounted() {
     window.addEventListener("keydown", this.handleKeyEvent.bind(this));
+    window.addEventListener(
+      "touchstart",
+      this.handleTouchStart.bind(this),
+      false
+    );
+    window.addEventListener(
+      "touchmove",
+      this.handleTouchMove.bind(this),
+      false
+    );
+    window.addEventListener("touchend", this.handleTouchEnd.bind(this), false);
   },
   destroyed() {
     window.removeEventListener("keydown", this.handleKeyEvent);
+    window.removeEventListener("touchstart", this.handleTouchStart);
+    window.removeEventListener("touchmove", this.handleTouchMove);
+    window.removeEventListener("touchend", this.handleTouchEnd);
   },
   computed: {
     translateAmount() {
@@ -99,6 +123,32 @@ export default {
     }
   },
   methods: {
+    handleTouchStart($event) {
+      this.touchData.startX = $event.touches[0].clientX;
+      this.touchData.startY = $event.touches[0].clientY;
+    },
+    handleTouchMove($event) {
+      this.touchData.endX = $event.touches[0].clientX;
+      this.touchData.endY = $event.touches[0].clientY;
+    },
+    handleTouchEnd() {
+      const xDiff = this.touchData.endX - this.touchData.startX;
+      const yDiff = this.touchData.endY - this.touchData.startY;
+
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > 0) {
+          this.slideLeft();
+        } else {
+          this.slideRight();
+        }
+      } else {
+        if (yDiff > 0) {
+          this.hideDetail();
+        } else {
+          this.displayDetail();
+        }
+      }
+    },
     handleKeyEvent($event) {
       if ($event.key === "ArrowRight") {
         this.slideRight();
@@ -170,6 +220,28 @@ export default {
 };
 </script>
 <style scoped>
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
 .beers-wrapper {
   height: 100%;
   width: 100%;
@@ -221,6 +293,17 @@ export default {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+}
+
+.up-slide-btn {
+  z-index: 1;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.hidden {
+  animation: fadeOut 0.3s forwards;
 }
 
 .beer-detail {
